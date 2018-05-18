@@ -53,9 +53,9 @@ func ParseMainPage(url string) {
 		s.Find("span").Each(func(i int, s *goquery.Selection) {
 			ver, ok := s.Attr("class")
 			if ok {
-				if ver == "versioncolumn" {
+				if ver == "slversioncolumn" {
 					s.Find("a").Each(func(i int, s *goquery.Selection) {
-						if strings.HasPrefix(strings.Trim(s.Text(), " "), "gl4") {
+						if strings.HasPrefix(strings.Trim(s.Text(), " "), "glsl4") {
 							link, ok := s.Attr("href")
 							if ok {
 								urls = append(urls, link)
