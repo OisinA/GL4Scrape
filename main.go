@@ -14,6 +14,7 @@ var url = "http://docs.gl"
 
 type Page struct {
 	Name        string
+	URL         string
 	Declaration []string
 	Parameters  []Parameter
 	Description string
@@ -139,6 +140,7 @@ func Parse(url string) Page {
 
 	return Page{
 		name,
+		url,
 		declaration,
 		parameters,
 		description,
