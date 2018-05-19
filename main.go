@@ -26,16 +26,10 @@ type Parameter struct {
 	Description string
 }
 
-var urls []string
-
 var pages []Page
 
 func main() {
 	ParseMainPage(url)
-	for i, v := range urls {
-		fmt.Println(fmt.Sprint(i) + " > " + v)
-		pages = append(pages, Parse(url+"/"+v))
-	}
 	b, err := json.Marshal(pages)
 	if err != nil {
 		log.Fatal(err)
@@ -49,6 +43,7 @@ func ParseMainPage(url string) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	index := 0
 	doc.Find("#commandlist span").Each(func(i int, s *goquery.Selection) {
 		s.Find("span").Each(func(i int, s *goquery.Selection) {
 			ver, ok := s.Attr("class")
@@ -58,7 +53,9 @@ func ParseMainPage(url string) {
 						if strings.HasPrefix(strings.Trim(s.Text(), " "), "glsl4") {
 							link, ok := s.Attr("href")
 							if ok {
-								urls = append(urls, link)
+								fmt.Println(fmt.Sprint(index) + " > " + link)
+								pages = append(pages, Parse(url+"/"+link))
+								index++
 							}
 						}
 					})
@@ -88,20 +85,20 @@ func Parse(url string) Page {
 	})
 
 	doc.Find("#parameters").Each(func(i int, s *goquery.Selection) {
-		var para_names []string
-		var para_descs []string
+		var paraNames []string
+		var paraDescs []string
 		s.Find(".term code").Each(func(i int, s *goquery.Selection) {
-			para_names = append(para_names, s.Text())
+			paraNames = append(paraNames, s.Text())
 		})
 		s.Find("p").Each(func(i int, s *goquery.Selection) {
-			para_descs = append(para_descs, s.Text())
+			paraDescs = append(paraDescs, s.Text())
 		})
-		for i := range para_descs {
-			if i > len(para_names)-1 {
+		for i := range paraDescs {
+			if i > len(paraNames)-1 {
 				return
 			}
 			parameters = append(parameters, Parameter{
-				para_names[i], para_descs[i],
+				paraNames[i], paraDescs[i],
 			})
 		}
 	})
@@ -110,28 +107,28 @@ func Parse(url string) Page {
 		description = description + s.Text()
 	})
 
-	var t_headings []string
+	var tHeadings []string
 
 	doc.Find(".informaltable").Each(func(i int, s *goquery.Selection) {
 		s.Find("thead th").Each(func(i int, s *goquery.Selection) {
 			if strings.Contains(s.Text(), ".") {
-				t_headings = append(t_headings, strings.Trim(s.Text(), " "))
+				tHeadings = append(tHeadings, strings.Trim(s.Text(), " "))
 			}
 		})
 		index := -1
-		td_name := ""
+		tdName := ""
 		s.Find("tbody tr").Each(func(i int, s *goquery.Selection) {
 			s.Find("td").Each(func(i int, s *goquery.Selection) {
 				if index == -1 {
 					index++
-					td_name = s.Text()
-					supports[td_name] = make(map[string]bool)
+					tdName = s.Text()
+					supports[tdName] = make(map[string]bool)
 					return
 				}
-				if index > len(t_headings)-1 {
+				if index > len(tHeadings)-1 {
 					return
 				}
-				supports[td_name][t_headings[index]] = strings.Trim(s.Text(), " ") != "-"
+				supports[tdName][tHeadings[index]] = strings.Trim(s.Text(), " ") != "-"
 				index++
 			})
 			index = -1
