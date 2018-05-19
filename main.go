@@ -43,16 +43,14 @@ func ParseMainPage(url string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	index := 0
+	var index int
 	doc.Find("#commandlist span").Each(func(i int, s *goquery.Selection) {
 		s.Find("span").Each(func(i int, s *goquery.Selection) {
-			ver, ok := s.Attr("class")
-			if ok {
+			if ver, ok := s.Attr("class"); ok {
 				if ver == "slversioncolumn" {
 					s.Find("a").Each(func(i int, s *goquery.Selection) {
 						if strings.HasPrefix(strings.Trim(s.Text(), " "), "glsl4") {
-							link, ok := s.Attr("href")
-							if ok {
+							if link, ok := s.Attr("href"); ok {
 								fmt.Println(fmt.Sprint(index) + " > " + link)
 								pages = append(pages, Parse(url+"/"+link))
 								index++
@@ -70,9 +68,9 @@ func Parse(url string) Page {
 	if err != nil {
 		log.Fatal(err)
 	}
-	name := ""
+	var name string
 	var declaration []string
-	description := ""
+	var description string
 	var parameters []Parameter
 	supports := make(map[string]map[string]bool)
 
@@ -116,7 +114,7 @@ func Parse(url string) Page {
 			}
 		})
 		index := -1
-		tdName := ""
+		var tdName string
 		s.Find("tbody tr").Each(func(i int, s *goquery.Selection) {
 			s.Find("td").Each(func(i int, s *goquery.Selection) {
 				if index == -1 {
